@@ -1,0 +1,348 @@
+
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101114">
+<title>Casper Photo</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #101114;
+  --panel: #1b1c21;
+  --accent: #d8b477;
+  --text: #f5f5f5;
+  --muted: #a5a5ad;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+header {
+  padding: 20px 18px 14px;
+  border-bottom: 1px solid #303037;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo { font-size: 23px; font-weight: 800; letter-spacing: -.7px; }
+.logo span { color: var(--accent); }
+.tag { color: var(--muted); font-size: 11px; margin-top: 4px; }
+main { max-width: 1000px; margin: auto; padding: 16px; }
+.preview {
+  min-height: 280px;
+  height: min(48vh, 500px);
+  background: #191a1f;
+  border: 1px solid #303037;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+#photo {
+  display: none;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.placeholder { text-align: center; padding: 20px; color: var(--muted); }
+.placeholder .camera { font-size: 45px; margin-bottom: 10px; }
+.actions { display: flex; gap: 9px; margin: 14px 0; }
+button, .upload {
+  background: #292a31;
+  color: var(--text);
+  border: 1px solid #3a3b44;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.primary { background: var(--accent); color: #17130d; border-color: var(--accent); }
+.upload { flex: 1; text-align: center; }
+.actions button { flex: 1; }
+.section-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin: 24px 0 12px;
+}
+.presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.preset { padding: 0; overflow: hidden; text-align: left; background: var(--panel); }
+.swatch { height: 55px; }
+.preset span { display: block; padding: 10px; font-size: 12px; }
+.controls {
+  background: var(--panel);
+  border: 1px solid #303037;
+  border-radius: 14px;
+  padding: 15px;
+}
+.control { margin: 0 0 19px; }
+.control:last-child { margin-bottom: 0; }
+.control-head { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; }
+.control output { color: var(--accent); font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+input[type=text] {
+  width: 100%; padding: 12px; background: #292a31;
+  color: white; border: 1px solid #3a3b44; border-radius: 9px;
+}
+footer { text-align: center; padding: 25px; color: var(--muted); font-size: 11px; }
+@media(min-width:700px) {
+  main { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; }
+  .editor { min-width: 0; }
+  .preview { height: 65vh; }
+  .actions { grid-column: 1; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="logo">CASPER <span>PHOTO</span></div>
+    <div class="tag">YOUR PHOTOS. YOUR STYLE.</div>
+  </div>
+  <div>✦</div>
+</header>
+
+<main>
+<section>
+  <div class="preview">
+    <div class="placeholder" id="placeholder">
+      <div class="camera">📷</div>
+      <strong>Fotografia ta începe aici</strong>
+      <p>Încarcă o imagine ca să începi editarea.</p>
+    </div>
+    <img id="photo" alt="Fotografie în curs de editare">
+  </div>
+  <div class="actions">
+    <label class="upload primary" for="file">＋ Deschide fotografia</label>
+    <input id="file" type="file" accept="image/*" hidden>
+  </div>
+  <div class="actions">
+    <button onclick="rotate()">↻ Rotește</button>
+    <button onclick="resetPhoto()">Resetează</button>
+    <button class="primary" onclick="downloadPhoto()">↓ Salvează HD</button>
+  </div>
+</section>
+
+<section class="editor">
+  <div class="section-title">Preseturi</div>
+  <div class="presets">
+    <button class="preset" onclick="setPreset('none')">
+      <div class="swatch" style="background:linear-gradient(135deg,#aaa,#555)"></div>
+      <span>Original</span>
+    </button>
+    <button class="preset" onclick="setPreset('warm')">
+      <div class="swatch" style="background:linear-gradient(135deg,#ffd08a,#a54e28)"></div>
+      <span>Warm</span>
+    </button>
+    <button class="preset" onclick="setPreset('cool')">
+      <div class="swatch" style="background:linear-gradient(135deg,#c2e4ff,#395f99)"></div>
+      <span>Cool</span>
+    </button>
+    <button class="preset" onclick="setPreset('rose')">
+      <div class="swatch" style="background:linear-gradient(135deg,#ffc8d8,#9d5a78)"></div>
+      <span>Rose</span>
+    </button>
+    <button class="preset" onclick="setPreset('mono')">
+      <div class="swatch" style="background:linear-gradient(135deg,#eee,#222)"></div>
+      <span>Mono</span>
+    </button>
+    <button class="preset" onclick="setPreset('gold')">
+      <div class="swatch" style="background:linear-gradient(135deg,#fff0a8,#b77b27)"></div>
+      <span>Golden</span>
+    </button>
+  </div>
+
+  <div class="section-title">Lumină și culoare</div>
+  <div class="controls">
+    <div class="control">
+      <div class="control-head"><label for="brightness">Luminozitate</label><output id="brightnessVal">100</output></div>
+      <input id="brightness" type="range" min="40" max="180" value="100">
+    </div>
+    <div class="control">
+      <div class="control-head"><label for="contrast">Contrast</label><output id="contrastVal">100</output></div>
+      <input id="contrast" type="range" min="40" max="180" value="100">
+    </div>
+    <div class="control">
+      <div class="control-head"><label for="saturation">Saturație</label><output id="saturationVal">100</output></div>
+      <input id="saturation" type="range" min="0" max="200" value="100">
+    </div>
+    <div class="control">
+      <div class="control-head"><label for="warmth">Temperatură</label><output id="warmthVal">0</output></div>
+      <input id="warmth" type="range" min="-50" max="50" value="0">
+    </div>
+    <div class="control">
+      <div class="control-head"><label for="softness">Efect Soft</label><output id="softnessVal">0</output></div>
+      <input id="softness" type="range" min="0" max="4" value="0" step=".5">
+    </div>
+  </div>
+
+  <div class="section-title">Text pe fotografie</div>
+  <div class="controls">
+    <div class="control">
+      <input type="text" id="overlayText" placeholder="Scrie textul tău...">
+    </div>
+    <button onclick="applyText()">Adaugă text</button>
+    <button onclick="clearText()">Șterge textul</button>
+  </div>
+</section>
+</main>
+
+<footer>CASPER PHOTO · Editare foto direct în browser</footer>
+
+<script>
+const img = document.getElementById('photo');
+const placeholder = document.getElementById('placeholder');
+const fileInput = document.getElementById('file');
+const sliderIds = ['brightness','contrast','saturation','warmth','softness'];
+let originalURL = null;
+let rotation = 0;
+let preset = 'none';
+let addedText = '';
+
+const settings = {
+  brightness: 100,
+  contrast: 100,
+  saturation: 100,
+  warmth: 0,
+  softness: 0
+};
+
+fileInput.addEventListener('change', event => {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (originalURL) URL.revokeObjectURL(originalURL);
+  originalURL = URL.createObjectURL(file);
+  img.onload = () => {
+    img.style.display = 'block';
+    placeholder.style.display = 'none';
+    rotation = 0;
+    render();
+  };
+  img.src = originalURL;
+});
+
+sliderIds.forEach(id => {
+  const slider = document.getElementById(id);
+  slider.addEventListener('input', () => {
+    settings[id] = Number(slider.value);
+    document.getElementById(id + 'Val').textContent = slider.value;
+    render();
+  });
+});
+
+function setPreset(name) {
+  preset = name;
+  render();
+}
+
+function getFilters() {
+  let brightness = settings.brightness;
+  let contrast = settings.contrast;
+  let saturation = settings.saturation;
+  let warmth = settings.warmth;
+  let softness = settings.softness;
+
+  if (preset === 'warm') { warmth += 18; saturation += 12; contrast += 5; }
+  if (preset === 'cool') { warmth -= 18; contrast += 8; }
+  if (preset === 'rose') { warmth += 10; saturation -= 8; brightness += 5; }
+  if (preset === 'mono') { saturation = 0; contrast += 15; }
+  if (preset === 'gold') { warmth += 25; saturation += 15; brightness += 4; }
+
+  return `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) sepia(${Math.max(0, warmth) / 150}) hue-rotate(${Math.min(0, warmth) * 0.7}deg) blur(${softness}px)`;
+}
+
+function render() {
+  img.style.filter = getFilters();
+  img.style.transform = `rotate(${rotation}deg)`;
+}
+
+function rotate() {
+  rotation = (rotation + 90) % 360;
+  render();
+}
+
+function resetPhoto() {
+  sliderIds.forEach(id => {
+    const el = document.getElementById(id);
+    el.value = id === 'brightness' || id === 'contrast' || id === 'saturation' ? 100 : 0;
+    settings[id] = Number(el.value);
+    document.getElementById(id + 'Val').textContent = el.value;
+  });
+  preset = 'none';
+  rotation = 0;
+  addedText = '';
+  document.getElementById('overlayText').value = '';
+  render();
+}
+
+function applyText() {
+  const text = document.getElementById('overlayText').value.trim();
+  if (!text) {
+    alert('Scrie mai întâi textul pe care vrei să-l adaugi.');
+    return;
+  }
+  addedText = text;
+  alert('Textul va apărea pe fotografia exportată.');
+}
+
+function clearText() {
+  addedText = '';
+  document.getElementById('overlayText').value = '';
+}
+
+function downloadPhoto() {
+  if (!img.src || img.style.display === 'none') {
+    alert('Încarcă mai întâi o fotografie.');
+    return;
+  }
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const sideways = rotation % 180 !== 0;
+  canvas.width = sideways ? img.naturalHeight : img.naturalWidth;
+  canvas.height = sideways ? img.naturalWidth : img.naturalHeight;
+
+  ctx.save();
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate(rotation * Math.PI / 180);
+  ctx.filter = getFilters();
+  ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+  ctx.restore();
+
+  if (addedText) {
+    const fontSize = Math.max(24, Math.round(canvas.width * 0.045));
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.lineWidth = Math.max(2, fontSize * 0.08);
+    ctx.strokeStyle = 'rgba(0,0,0,.7)';
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeText(addedText, canvas.width / 2, canvas.height - canvas.height * 0.05);
+    ctx.fillText(addedText, canvas.width / 2, canvas.height - canvas.height * 0.05);
+  }
+
+  canvas.toBlob(blob => {
+    if (!blob) {
+      alert('Nu am putut salva fotografia. Încearcă din nou.');
+      return;
+    }
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'casper-photo.png';
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }, 'image/png');
+}
+</script>
+</body>
+</html>
